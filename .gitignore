@@ -1,0 +1,13 @@
+*.env
+*.swp
+*.swo
+localchat
+node_modules
+lib
+bindata.go
+.merlin
+venv
+__pycache__
+browserify-cache.json
+static/*bundle*
+.pyre

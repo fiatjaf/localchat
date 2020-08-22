@@ -1,0 +1,67 @@
+<!-- @format -->
+
+<script>
+  import {onMount} from 'svelte'
+
+  import * as toast from './toast'
+  import {getMessages} from './stores'
+
+  var room = 'main'
+  var messages = getMessages(room)
+
+  var input = ''
+  function sendMessage(e) {
+    e.preventDefault()
+    fetch(`/${room}/send`, {method: 'post', body: input})
+    input = ''
+  }
+</script>
+
+<style>
+  * {
+    font-family: monospace;
+  }
+  #chat {
+    display: grid;
+  }
+  .message {
+    width: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+  form {
+    display: flex;
+  }
+  form input {
+    flex-grow: 4;
+  }
+  form button {
+    flex-shrink: 4;
+  }
+</style>
+
+<svelte:head>
+  {#if room}
+  <title>localchat - room</title>
+  {/if}
+</svelte:head>
+
+<header>
+  <div id="logo">
+    <h1><a href="#/">localchat</a> - {room}</h1>
+  </div>
+  <main>
+    <form on:submit="{sendMessage}">
+      <input bind:value="{input}" />
+      <button>Send</button>
+    </form>
+    <div id="chat">
+      {#each $messages as message}
+      <div class="message">
+        {message}
+      </div>
+      {/each}
+    </div>
+  </main>
+</header>
