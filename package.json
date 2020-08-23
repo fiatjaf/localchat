@@ -2,7 +2,7 @@
   "devDependencies": {
     "@rollup/plugin-commonjs": "^12.0.0",
     "@rollup/plugin-json": "^4.1.0",
-    "@rollup/plugin-node-resolve": "^8.0.1",
+    "@rollup/plugin-node-resolve": "^8.4.0",
     "prettier-plugin-svelte": "^0.7.0",
     "rollup": "2.13.1",
     "rollup-plugin-svelte": "^5.2.3",
@@ -10,6 +10,9 @@
     "svelte": "~3.23.2"
   },
   "dependencies": {
-    "toastify-js": "^1.8.0"
+    "cuid": "^2.1.8",
+    "friendly-time": "^1.1.1",
+    "hashbow": "^1.1.1",
+    "toastify-js": "^1.9.1"
   }
 }

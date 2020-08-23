@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -55,10 +57,11 @@ func messageStream(w http.ResponseWriter, r *http.Request) {
 	// now send all past messages
 	messages, err := rds.LRange("localchat:"+room, 0, -1).Result()
 	if err != nil {
-		es.SendEventMessage(err.Error(), "error", "couldn't load past messages")
+		es.SendEventMessage("couldn't load past messages:"+err.Error(), "error", "")
 	} else {
+		es.SendEventMessage("", "reset", "")
 		for _, message := range messages {
-			es.SendEventMessage(message, "message", message)
+			es.SendEventMessage(message, "message", "")
 		}
 	}
 }
@@ -79,13 +82,16 @@ func newMessage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	spl := strings.Split(message, "|~|")
+	message = fmt.Sprintf(`["%s", "%s", %d]`, spl[0], spl[1], time.Now().Unix())
+
 	err = rds.Eval(`
 local roomkey = 'localchat:' .. KEYS[1]
 local message = ARGV[1]
 if redis.call('llen', roomkey) > 100 then
-  redis.call('rpop', roomkey)
+  redis.call('lpop', roomkey)
 end
-redis.call('lpush', roomkey, message)
+redis.call('rpush', roomkey, message)
 redis.call('expire', roomkey, 3600 * 24 * 7)
 return 1
     `, []string{room}, message).Err()
