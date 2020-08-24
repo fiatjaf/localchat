@@ -31,6 +31,16 @@
     es.addEventListener('error', e => {
       toast.error(e.data)
     })
+
+    const storedMessageListener = e => {
+      let message = e.data
+      messages = [parseMessage(message), ...messages]
+    }
+    es.addEventListener('stored-message', storedMessageListener)
+    setTimeout(() => {
+      es.removeEventListener('stored-message', storedMessageListener)
+    }, 500)
+
     es.addEventListener('message', e => {
       let message = e.data
       messages = [parseMessage(message), ...messages]

@@ -61,9 +61,8 @@ func messageStream(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		es.SendEventMessage("couldn't load past messages:"+err.Error(), "error", "")
 	} else {
-		es.SendEventMessage("", "reset", "")
 		for _, message := range messages {
-			es.SendEventMessage(message, "message", "")
+			es.SendEventMessage(message, "stored-message", "")
 		}
 	}
 }
