@@ -11,7 +11,7 @@
   onMount(() => {
     user = localStorage.getItem('user')
     if (!user) {
-      user = cuid.slug()
+      user = cuid()
       localStorage.setItem('user', user)
     }
   })
@@ -64,7 +64,7 @@
     display: flex;
   }
   .message .date {
-    width: 120px;
+    min-width: 120px;
     margin-right: 10px;
     font-size: 90%;
   }
@@ -96,7 +96,10 @@
       <div class="date" title="{(new Date(message[2] * 1000)).toISOString()}">
         {friendlyTime(new Date(message[2]* 1000))}
       </div>
-      <div class="text" style="color: {hashbow(message[1])};">
+      <div
+        class="text"
+        style="color: {hashbow($router.params.room + message[0])};"
+      >
         {message[1]}
       </div>
     </div>
