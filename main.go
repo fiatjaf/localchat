@@ -24,7 +24,7 @@ type Settings struct {
 	Host       string `envconfig:"HOST" default:"0.0.0.0"`
 	Port       string `envconfig:"PORT" required:"true"`
 	ServiceURL string `envconfig:"SERVICE_URL" required:"true"`
-	RedisURL   string `envconfig:"REDIS_URL" required:"true"`
+	RedisURL   string `envconfig:"REDIS_URL"`
 }
 
 func main() {
@@ -33,16 +33,21 @@ func main() {
 		log.Fatal().Err(err).Msg("couldn't process envconfig.")
 	}
 
-	// redis connection
-	rurl, _ := url.Parse(s.RedisURL)
-	pw, _ := rurl.User.Password()
-	rds = redis.NewClient(&redis.Options{
-		Addr:     rurl.Host,
-		Password: pw,
-	})
-	if err := rds.Ping().Err(); err != nil {
-		log.Fatal().Err(err).Str("url", s.RedisURL).
-			Msg("failed to connect to redis")
+	// redis connection (optional)
+	if s.RedisURL == "" {
+		log.Info().Msg("will run without redis. messages won't be cached.")
+	} else {
+		rurl, _ := url.Parse(s.RedisURL)
+		pw, _ := rurl.User.Password()
+		rds = redis.NewClient(&redis.Options{
+			Addr:     rurl.Host,
+			Password: pw,
+		})
+		if err := rds.Ping().Err(); err != nil {
+			log.Warn().Err(err).Str("url", s.RedisURL).Msg("failed to connect to redis")
+			log.Info().Msg("will run without redis. messages won't be cached.")
+			rds = nil
+		}
 	}
 
 	// routes

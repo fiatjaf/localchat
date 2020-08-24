@@ -17,6 +17,11 @@ import (
 var messageStreams = cmap.New()
 
 func storedMessages(w http.ResponseWriter, r *http.Request) {
+	if rds == nil {
+		json.NewEncoder(w).Encode([]string{})
+		return
+	}
+
 	broom, _ := base64.StdEncoding.DecodeString(mux.Vars(r)["room"])
 	room := string(broom)
 
@@ -96,7 +101,8 @@ func newMessage(w http.ResponseWriter, r *http.Request) {
 	spl := strings.Split(message, "|~|")
 	message = fmt.Sprintf(`["%s", "%s", %d]`, spl[0], spl[1], time.Now().Unix())
 
-	err = rds.Eval(`
+	if rds != nil {
+		err = rds.Eval(`
 local roomkey = 'localchat:' .. KEYS[1]
 local message = ARGV[1]
 if redis.call('llen', roomkey) > 100 then
@@ -106,10 +112,11 @@ redis.call('lpush', roomkey, message)
 redis.call('expire', roomkey, 3600 * 24 * 7)
 return 1
     `, []string{room}, message).Err()
-	if err != nil {
-		log.Error().Err(err).Msg("failed to store message")
-		http.Error(w, "failed to store message", 500)
-		return
+		if err != nil {
+			log.Error().Err(err).Msg("failed to store message")
+			http.Error(w, "failed to store message", 500)
+			return
+		}
 	}
 
 	// dispatch message to all listeners
