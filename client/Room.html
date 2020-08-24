@@ -30,7 +30,6 @@
     es = new EventSource(`/${window.btoa($router.params.room)}/receive`)
     es.onerror = e => {
       console.log('sse error', e.data)
-      messages = []
     }
     es.addEventListener('error', e => {
       toast.error(e.data)
