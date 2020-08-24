@@ -92,7 +92,11 @@
   <div id="chat">
     {#each messages as message}
     <div class="message">
-      <div class="date" title="{(new Date(message[2] * 1000)).toISOString()}">
+      <div
+        class="date"
+        title="{(new Date(message[2] * 1000)).toISOString()}"
+        style="border-right: 3px solid; border-right-color: {hashbow(message[0])}"
+      >
         {friendlyTime(new Date(message[2]* 1000))}
       </div>
       <div
