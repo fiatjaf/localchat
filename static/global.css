@@ -4,5 +4,7 @@
 }
 
 body {
-  margin: 20px 80px;
+  width: 950px;
+  margin: 20px auto;
+  max-width: 99.5%;
 }
