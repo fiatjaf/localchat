@@ -2,12 +2,14 @@
 
 <script>
   import {onMount} from 'svelte'
-  import {navigateTo, router} from 'yrv'
+  import {navigateTo} from 'yrv'
 
   onMount(async () => {
     let {ip, type} = await (await fetch('/info')).json()
-    if (!$router.params.room) {
-      navigateTo('/' + ip, {replace: true})
-    }
+    navigateTo('/' + ip, {replace: true})
   })
 </script>
+
+<div>
+  Joining your local IP room...
+</div>
