@@ -1,0 +1,75 @@
+<script>
+  import {onMount} from 'svelte'
+  import friendlyTime from 'friendly-time'
+  import hashbow from 'hashbow'
+  import cuid from 'cuid'
+
+  import * as toast from './toast'
+  import {getMessages} from './stores'
+
+  export let room
+  const messages = getMessages(room)
+  var user
+  onMount(() => {
+    user = localStorage.getItem('user')
+    if (!user) {
+      user = cuid.slug()
+      localStorage.setItem('user', user)
+    }
+  })
+
+  var input = ''
+  function sendMessage(e) {
+    e.preventDefault()
+    fetch(`/${btoa(room)}/send`, {method: 'post', body: user + '|~|' + input})
+    input = ''
+  }
+</script>
+
+<style>
+  #chat {
+    display: grid;
+  }
+  .message {
+    display: flex;
+  }
+  .message .date {
+    width: 120px;
+    margin-right: 10px;
+    font-size: 90%;
+  }
+  .message .text {
+    flex-grow: 4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+  form {
+    display: flex;
+  }
+  form input {
+    flex-grow: 4;
+  }
+  form button {
+    flex-shrink: 4;
+  }
+</style>
+
+<main>
+  <form on:submit="{sendMessage}">
+    <input bind:value="{input}" maxlength="400" />
+    <button>Send</button>
+  </form>
+  <div id="chat">
+    {#each $messages as message}
+    <div class="message">
+      <div class="date" title="{(new Date(message.time * 1000)).toISOString()}">
+        {friendlyTime(new Date(message.time * 1000))}
+      </div>
+      <div class="text" style="color: {hashbow(message.user)};">
+        {message.message}
+      </div>
+    </div>
+    {/each}
+  </div>
+</main>

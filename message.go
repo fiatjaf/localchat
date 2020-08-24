@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +16,8 @@ import (
 var messageStreams = cmap.New()
 
 func messageStream(w http.ResponseWriter, r *http.Request) {
-	room := mux.Vars(r)["room"]
+	broom, _ := base64.StdEncoding.DecodeString(mux.Vars(r)["room"])
+	room := string(broom)
 
 	var es eventsource.EventSource
 	ies, ok := messageStreams.Get(room)
@@ -67,7 +69,8 @@ func messageStream(w http.ResponseWriter, r *http.Request) {
 }
 
 func newMessage(w http.ResponseWriter, r *http.Request) {
-	room := mux.Vars(r)["room"]
+	broom, _ := base64.StdEncoding.DecodeString(mux.Vars(r)["room"])
+	room := string(broom)
 
 	defer r.Body.Close()
 	bmessage, err := ioutil.ReadAll(r.Body)

@@ -6,8 +6,12 @@ export function getMessages(room) {
   var list = []
 
   return readable(list, set => {
-    const es = new EventSource(`/${room}/receive`)
-    es.onerror = e => console.log('sse error', e.data)
+    const es = new EventSource(`/${window.btoa(room)}/receive`)
+    es.onerror = e => {
+      console.log('sse error', e.data)
+      list = []
+      set(list)
+    }
     es.addEventListener('error', e => {
       toast.error(e.data)
     })
