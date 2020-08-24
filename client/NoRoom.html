@@ -5,13 +5,9 @@
   import {navigateTo, router} from 'yrv'
 
   onMount(async () => {
-    let {ip, type} = await getInfo()
+    let {ip, type} = await (await fetch('/info')).json()
     if (!$router.params.room) {
       navigateTo('/' + ip, {replace: true})
     }
   })
-
-  async function getInfo() {
-    return await (await fetch('/info', {mode: 'no-cors'})).json()
-  }
 </script>

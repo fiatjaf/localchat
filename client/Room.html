@@ -18,7 +18,11 @@
 
   var messages = []
   var es
-  onMount(() => {
+  onMount(async () => {
+    messages = await (
+      await fetch(`/${btoa($router.params.room)}/stored`)
+    ).json()
+
     if (es) {
       es.close()
     }
@@ -31,19 +35,9 @@
     es.addEventListener('error', e => {
       toast.error(e.data)
     })
-
-    const storedMessageListener = e => {
-      let message = e.data
-      messages = [parseMessage(message), ...messages]
-    }
-    es.addEventListener('stored-message', storedMessageListener)
-    setTimeout(() => {
-      es.removeEventListener('stored-message', storedMessageListener)
-    }, 500)
-
     es.addEventListener('message', e => {
       let message = e.data
-      messages = [parseMessage(message), ...messages]
+      messages = [JSON.parse(message), ...messages]
     })
 
     return () => {
@@ -59,15 +53,6 @@
       body: user + '|~|' + input
     })
     input = ''
-  }
-
-  function parseMessage(data) {
-    try {
-      let [user, message, time] = JSON.parse(data)
-      return {user, message, time}
-    } catch (e) {
-      return {user: '', message: data, time: 0}
-    }
   }
 </script>
 
@@ -108,11 +93,11 @@
   <div id="chat">
     {#each messages as message}
     <div class="message">
-      <div class="date" title="{(new Date(message.time * 1000)).toISOString()}">
-        {friendlyTime(new Date(message.time * 1000))}
+      <div class="date" title="{(new Date(message[2] * 1000)).toISOString()}">
+        {friendlyTime(new Date(message[2]* 1000))}
       </div>
-      <div class="text" style="color: {hashbow(message.user)};">
-        {message.message}
+      <div class="text" style="color: {hashbow(message[1])};">
+        {message[1]}
       </div>
     </div>
     {/each}

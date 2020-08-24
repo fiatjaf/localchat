@@ -48,6 +48,7 @@ func main() {
 	// routes
 	router.PathPrefix("/static/").Methods("GET").Handler(http.FileServer(httpPublic))
 	router.Path("/info").Methods("GET").HandlerFunc(info)
+	router.Path("/{room}/stored").Methods("GET").HandlerFunc(storedMessages)
 	router.Path("/{room}/receive").Methods("GET").HandlerFunc(messageStream)
 	router.Path("/{room}/send").Methods("POST").HandlerFunc(newMessage)
 	//	router.Path("/favicon.ico").Methods("GET").HandlerFunc(

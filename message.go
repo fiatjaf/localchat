@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +15,24 @@ import (
 )
 
 var messageStreams = cmap.New()
+
+func storedMessages(w http.ResponseWriter, r *http.Request) {
+	broom, _ := base64.StdEncoding.DecodeString(mux.Vars(r)["room"])
+	room := string(broom)
+
+	messages, err := rds.LRange("localchat:"+room, 0, -1).Result()
+	if err != nil {
+		log.Error().Err(err).Msg("failed to load past messages")
+		http.Error(w, "failed to load past messages", 511)
+		return
+	}
+
+	jmessages := make([]json.RawMessage, len(messages))
+	for i, message := range messages {
+		jmessages[i] = json.RawMessage(message)
+	}
+	json.NewEncoder(w).Encode(jmessages)
+}
 
 func messageStream(w http.ResponseWriter, r *http.Request) {
 	broom, _ := base64.StdEncoding.DecodeString(mux.Vars(r)["room"])
@@ -55,16 +74,6 @@ func messageStream(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	es.ServeHTTP(w, r)
-
-	// now send all past messages
-	messages, err := rds.LRange("localchat:"+room, 0, -1).Result()
-	if err != nil {
-		es.SendEventMessage("couldn't load past messages:"+err.Error(), "error", "")
-	} else {
-		for _, message := range messages {
-			es.SendEventMessage(message, "stored-message", "")
-		}
-	}
 }
 
 func newMessage(w http.ResponseWriter, r *http.Request) {
@@ -91,9 +100,9 @@ func newMessage(w http.ResponseWriter, r *http.Request) {
 local roomkey = 'localchat:' .. KEYS[1]
 local message = ARGV[1]
 if redis.call('llen', roomkey) > 100 then
-  redis.call('lpop', roomkey)
+  redis.call('rpop', roomkey)
 end
-redis.call('rpush', roomkey, message)
+redis.call('lpush', roomkey, message)
 redis.call('expire', roomkey, 3600 * 24 * 7)
 return 1
     `, []string{room}, message).Err()
@@ -109,7 +118,7 @@ return 1
 	if ok {
 		es = ies.(eventsource.EventSource)
 	} else {
-		http.Error(w, "no one is listening", 501)
+		http.Error(w, "no one is listening", 512)
 		return
 	}
 	es.SendEventMessage(message, "message", "")
