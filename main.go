@@ -56,14 +56,14 @@ func main() {
 	router.Path("/{room}/stored").Methods("GET").HandlerFunc(storedMessages)
 	router.Path("/{room}/receive").Methods("GET").HandlerFunc(messageStream)
 	router.Path("/{room}/send").Methods("POST").HandlerFunc(newMessage)
-	//	router.Path("/favicon.ico").Methods("GET").HandlerFunc(
-	//		func(w http.ResponseWriter, r *http.Request) {
-	//			w.Header().Set("Content-Type", "image/png")
-	//			iconf, _ := httpPublic.Open("static/icon.png")
-	//			fstat, _ := iconf.Stat()
-	//			http.ServeContent(w, r, "static/icon.png", fstat.ModTime(), iconf)
-	//			return
-	//		})
+	router.Path("/favicon.ico").Methods("GET").HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "image/png")
+			iconf, _ := httpPublic.Open("static/icon.png")
+			fstat, _ := iconf.Stat()
+			http.ServeContent(w, r, "static/icon.png", fstat.ModTime(), iconf)
+			return
+		})
 	router.PathPrefix("/").Methods("GET").HandlerFunc(serveClient)
 
 	// start http server
