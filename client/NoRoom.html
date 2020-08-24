@@ -1,0 +1,15 @@
+<!-- @format -->
+
+<script>
+  import {onMount} from 'svelte'
+  import {replace} from 'svelte-spa-router'
+
+  onMount(async () => {
+    let {ip, type} = await getInfo()
+    replace('/' + ip)
+  })
+
+  async function getInfo() {
+    return await (await fetch('/info', {mode: 'no-cors'})).json()
+  }
+</script>

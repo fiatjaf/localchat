@@ -1,34 +1,24 @@
-<!-- @format -->
-
 <script>
-  import {onMount} from 'svelte'
+  import Router from 'svelte-spa-router'
 
   import Room from './Room.html'
+  import NoRoom from './NoRoom.html'
+  import {room} from './stores'
 
-  var room
-
-  onMount(async () => {
-    let {ip, type} = await getInfo()
-    if (!room) {
-      room = ip
-    }
-  })
-
-  async function getInfo() {
-    return await (await fetch('/info', {mode: 'no-cors'})).json()
+  const routes = {
+    '/': NoRoom,
+    '/:room': Room
   }
 </script>
 
 <svelte:head>
-  <title>localchat - {room}</title>
+  <title>localchat - {$room || 'no room'}</title>
 </svelte:head>
 
 <header>
   <div id="logo">
-    <h1><a href="#/">localchat</a> - {room}</h1>
+    <h1><a href="#/">localchat</a> - {$room || 'join a room'}</h1>
   </div>
 </header>
 
-{#if room}
-<Room room="{room}" />
-{:else} loading... {/if}
+<main><Router {routes} /></main>

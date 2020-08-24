@@ -13,6 +13,7 @@
     "cuid": "^2.1.8",
     "friendly-time": "^1.1.1",
     "hashbow": "^1.1.1",
+    "svelte-spa-router": "^2.2.0",
     "toastify-js": "^1.9.1"
   }
 }

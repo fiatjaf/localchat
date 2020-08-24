@@ -5,10 +5,9 @@
   import cuid from 'cuid'
 
   import * as toast from './toast'
-  import {getMessages} from './stores'
+  import {messages, room, joinRoom} from './stores'
 
-  export let room
-  const messages = getMessages(room)
+  export let params
   var user
   onMount(() => {
     user = localStorage.getItem('user')
@@ -18,10 +17,14 @@
     }
   })
 
+  onMount(() => {
+    joinRoom(params.room)
+  })
+
   var input = ''
   function sendMessage(e) {
     e.preventDefault()
-    fetch(`/${btoa(room)}/send`, {method: 'post', body: user + '|~|' + input})
+    fetch(`/${btoa($room)}/send`, {method: 'post', body: user + '|~|' + input})
     input = ''
   }
 </script>
