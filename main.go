@@ -21,10 +21,9 @@ var httpPublic = &assetfs.AssetFS{Asset: Asset, AssetDir: AssetDir, Prefix: ""}
 var router = mux.NewRouter()
 
 type Settings struct {
-	Host       string `envconfig:"HOST" default:"0.0.0.0"`
-	Port       string `envconfig:"PORT" required:"true"`
-	ServiceURL string `envconfig:"SERVICE_URL" required:"true"`
-	RedisURL   string `envconfig:"REDIS_URL"`
+	Host     string `envconfig:"HOST" default:"0.0.0.0"`
+	Port     string `envconfig:"PORT" required:"true"`
+	RedisURL string `envconfig:"REDIS_URL"`
 }
 
 func main() {
