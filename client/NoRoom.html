@@ -2,11 +2,13 @@
 
 <script>
   import {onMount} from 'svelte'
-  import {replace} from 'svelte-spa-router'
+  import {navigateTo, router} from 'yrv'
 
   onMount(async () => {
     let {ip, type} = await getInfo()
-    replace('/' + ip)
+    if (!$router.params.room) {
+      navigateTo('/' + ip, {replace: true})
+    }
   })
 
   async function getInfo() {

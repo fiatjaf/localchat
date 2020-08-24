@@ -3,11 +3,10 @@
   import friendlyTime from 'friendly-time'
   import hashbow from 'hashbow'
   import cuid from 'cuid'
+  import {router} from 'yrv'
 
   import * as toast from './toast'
-  import {messages, room, joinRoom} from './stores'
 
-  export let params
   var user
   onMount(() => {
     user = localStorage.getItem('user')
@@ -17,15 +16,48 @@
     }
   })
 
+  var messages = []
+  var es
   onMount(() => {
-    joinRoom(params.room)
+    if (es) {
+      es.close()
+    }
+
+    es = new EventSource(`/${window.btoa($router.params.room)}/receive`)
+    es.onerror = e => {
+      console.log('sse error', e.data)
+      messages = []
+    }
+    es.addEventListener('error', e => {
+      toast.error(e.data)
+    })
+    es.addEventListener('message', e => {
+      let message = e.data
+      messages = [parseMessage(message), ...messages]
+    })
+
+    return () => {
+      es.close()
+    }
   })
 
   var input = ''
   function sendMessage(e) {
     e.preventDefault()
-    fetch(`/${btoa($room)}/send`, {method: 'post', body: user + '|~|' + input})
+    fetch(`/${btoa($router.params.room)}/send`, {
+      method: 'post',
+      body: user + '|~|' + input
+    })
     input = ''
+  }
+
+  function parseMessage(data) {
+    try {
+      let [user, message, time] = JSON.parse(data)
+      return {user, message, time}
+    } catch (e) {
+      return {user: '', message: data, time: 0}
+    }
   }
 </script>
 
@@ -64,7 +96,7 @@
     <button>Send</button>
   </form>
   <div id="chat">
-    {#each $messages as message}
+    {#each messages as message}
     <div class="message">
       <div class="date" title="{(new Date(message.time * 1000)).toISOString()}">
         {friendlyTime(new Date(message.time * 1000))}
