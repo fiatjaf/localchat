@@ -14,15 +14,25 @@ type Info struct {
 func info(w http.ResponseWriter, r *http.Request) {
 	info := Info{}
 
-	spl := strings.Split(r.RemoteAddr, "]:")
-	if len(spl) > 1 {
-		info.IP = spl[0][1:]
-		info.Type = "ipv6"
-	} else {
-		spl = strings.Split(r.RemoteAddr, ":")
-		if len(spl) > 1 {
-			info.IP = spl[0]
+	fwd := r.Header.Get("X-Forwarded-For")
+	if fwd != "" {
+		info.IP = strings.Split(fwd, ",")[0]
+		if strings.Index(info.IP, ":") == -1 {
 			info.Type = "ipv4"
+		} else {
+			info.Type = "ipv6"
+		}
+	} else {
+		spl := strings.Split(r.RemoteAddr, "]:")
+		if len(spl) > 1 {
+			info.IP = spl[0][1:]
+			info.Type = "ipv6"
+		} else {
+			spl = strings.Split(r.RemoteAddr, ":")
+			if len(spl) > 1 {
+				info.IP = spl[0]
+				info.Type = "ipv4"
+			}
 		}
 	}
 
