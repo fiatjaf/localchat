@@ -11,7 +11,7 @@
   onMount(() => {
     user = localStorage.getItem('user')
     if (!user) {
-      user = cuid()
+      user = cuid.slug()
       localStorage.setItem('user', user)
     }
   })
